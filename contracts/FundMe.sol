@@ -25,5 +25,17 @@ contract FundMe{
         addressToAmountFunded[funder] = 0;
 
       }
+      // reseting array;
+      funders = new address[](0);
+      //send currency 
+      //transfer - automatically reverts
+      //need to cast address to payable address
+      // payable(msg.sender).transfer(address(this).balance);
+      // //send only if there is require
+      // bool sendSuccess = payable (msg.sender).send(address(this).balance);
+      // require(sendSuccess, "send failed");
+      //call( calling virtually wothout  abi)
+      (bool callSuccess, ) = payable(msg.sender).call{value: address(this).balance}("");
+      require(callSuccess, "Call failed");
     }
 }
