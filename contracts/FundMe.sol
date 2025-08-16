@@ -1,41 +1,29 @@
 //SPDX-License-Identifier: MIT
-
-//get funds from user
-//withdraw funds
-//set a min funding value in usd
-
-//usefull tool - chainlink feed - can use the address as input for recieveinng the fucntionality of the contract 
-
 pragma solidity ^0.8.24;
 
-import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
-
+import {converter} from "./converter.sol";
 
 contract FundMe{
-    uint256 public minUsd = 1;
+  //if in library fucntions first parametnr is uint256 allow me to call them as they are methods of uint256
+  //solidity  just rewriting msg.value.getConverter() to converter.getConversion(msg.value)
+  using converter for uint256;
+
+    uint256 public minUsd = 4e18;
+    address[] public funders;
+    mapping(address => uint256 amountFunded) public addressToAmountFunded;
     function fund() public payable { 
-        //send money to contract/ Allow user to send $/have a minimum $ sent
-        //money are sended with the msg
-        require(msg.value > 1, "didn't send enough ETH");
+        require(msg.value.getConversion() >= minUsd,  "didn't send enough ETH");
+        funders.push(msg.sender);
+        addressToAmountFunded[msg.sender] = addressToAmountFunded[msg.sender] + msg.value;
         //but can undo
     }
-    // function withdraw() public {
-    //     //owner will use to withdraw
-    // }
-    function getPrice() public view returns(uint256) {
-        //need address and abi 
-        // 0x694AA1769357215DE4FAC081bf1f309aDC325306 eth/usd
-      //  AggregatorV3Interface(0x694AA1769357215DE4FAC081bf1f309aDC325306);
-      AggregatorV3Interface priceFeed = AggregatorV3Interface(0x694AA1769357215DE4FAC081bf1f309aDC325306);
-      (,int256 price,,,) = priceFeed.latestRoundData();
-      //eth to usd but 2000000000000000
-      return uint256(price * 1e10);
-    }
 
+    function withdraw() public {
+      //for loop
+      for (uint256 funderIndex = 0; funderIndex < funders.length; funderIndex++){
+        address funder = funders[funderIndex];
+        addressToAmountFunded[funder] = 0;
 
-    //version works only with thetransactions from metanask (remix its just browser js no real testnets)
-    function getVersion() public view returns (uint256){
-        return AggregatorV3Interface(0x694AA1769357215DE4FAC081bf1f309aDC325306).version();
+      }
     }
-    function getConversion() public {}
 }
