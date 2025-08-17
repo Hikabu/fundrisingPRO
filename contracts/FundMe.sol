@@ -2,11 +2,13 @@
 // 791446 gas before 901665
 //763635 constant 878181
 //851603 immutable
+//	823698 revert
 
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
 import {converter} from "./converter.sol";
+error NotOwner();
 
 contract FundMe{
 
@@ -51,8 +53,15 @@ contract FundMe{
       require(callSuccess, "Call failed");
     }
     modifier onlyOwner() {
-      require(msg.sender == i_owner, "Must be the owner");
+      if (msg.sender != i_owner) { revert NotOwner();}
       //whatever in the function
       _;
+    }
+    // if someone will send eth wothout fund 
+    receive() external payable{
+      fund();
+    }
+    fallback() external payable{
+      fund();
     }
 }
