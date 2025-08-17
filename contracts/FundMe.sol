@@ -1,3 +1,8 @@
+
+// 791446 gas before 901665
+//763635 constant 878181
+//851603 immutable
+
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
@@ -9,16 +14,16 @@ contract FundMe{
   //solidity  just rewriting msg.value.getConverter() to converter.getConversion(msg.value)
   using converter for uint256;
 
-    uint256 public minUsd = 5e18;
+    uint256 public constant MIN_USD = 5e18; // non need to change 
     address[] public funders;
     mapping(address => uint256 amountFunded) public addressToAmountFunded;
 
-    address public owner;
+    address public immutable i_owner;
   constructor() {
-      owner = msg.sender;
+      i_owner = msg.sender;
   }
     function fund() public payable { 
-        require(msg.value.getConversion() >= minUsd,  "didn't send enough ETH");
+        require(msg.value.getConversion() >=  MIN_USD,  "didn't send enough ETH");
         funders.push(msg.sender);
         addressToAmountFunded[msg.sender] = addressToAmountFunded[msg.sender] + msg.value;
         //but can undo
@@ -46,7 +51,7 @@ contract FundMe{
       require(callSuccess, "Call failed");
     }
     modifier onlyOwner() {
-      require(msg.sender == owner, "Must be the owner");
+      require(msg.sender == i_owner, "Must be the owner");
       //whatever in the function
       _;
     }
